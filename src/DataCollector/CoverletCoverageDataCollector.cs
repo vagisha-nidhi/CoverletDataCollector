@@ -3,32 +3,31 @@
 
 namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector
 {
+    using System.Collections.Generic;
     using System.Xml;
-    using Coverlet.Core;
-    using Microsoft.VisualStudio.TestPlatform.ObjectModel;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
-    [DataCollectorTypeUri(CoverletConstants.DataCollectorDefaultUri)]
-    [DataCollectorFriendlyName(CoverletConstants.DataCollectorFriendlyName)]
+    [DataCollectorTypeUri(CoverletConstants.DefaultUri)]
+    [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
     public class CoverletCoverageDataCollector : DataCollector
     {
-        // Hack 1:
-        // Vstest console supports multiple test modules in one pass but coverlet supports only one test module at a time for instrumentation. So we are doing following hack until coverlet supports multiple test modules in one pass:
-        // 1. Pass first test module as test module to coverlet.
-        // 2. In include directories, add directories of all test modules so that modules in those directories can be included.
-        // 3. In exclude filters, exclude all test modules so that test modules will not be instrumented.
-        // These above steps are hack until Coverlet supports multiple test module in one pass.
-        // Hack 2:
-        // Coverlet.core doesn't create result attachments for output formats. It gives the CoverageResult object. Consumer of coverlet needs to convert the CoverageResult object to result attachments.
-        // Ideally, this should be done by coverlet.core. Until that happens, we are doing following hack:
-        // 1. CoverletDataCollector is responsible for creating result attachments from CoverageResult object.
-        // 2. Code is duplicate of what is currently present in Coverlet.msbuild and Coverlet.console
+        private readonly CoverletEqtTrace eqtTrace;
         private DataCollectionEvents events;
-        private DataCollectionLogger logger;
-        private DataCollectionContext dataCollectorContext;
-        private CoverletSettings settings;
+        private CoverletLogger logger;
+        private XmlElement configurationElement;
+        private DataCollectionSink dataSink;
+        private DataCollectionContext dataCollectionContext;
         private CoverageManager coverageManager;
         private AttachmentManager attachmentManager;
+
+        public CoverletCoverageDataCollector() : this(new CoverletEqtTrace())
+        {
+        }
+
+        private CoverletCoverageDataCollector(CoverletEqtTrace eqtTrace) : base()
+        {
+            this.eqtTrace = eqtTrace;
+        }
 
         public override void Initialize(
             XmlElement configurationElement,
@@ -37,50 +36,84 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector
             DataCollectionLogger logger,
             DataCollectionEnvironmentContext environmentContext)
         {
-            // TODO: Think about logs, telemtry, console output etc.
-            // TODO: thinks about design mode, command line for both Run all and Run selected scenarios.
-            EqtTrace.Info("Enabling coverlet datacollector with configuration: {0}", configurationElement?.OuterXml); // TODO: If testplatform is already outputing info of datacollector initialization, don't put it here.
+            if (this.eqtTrace.IsInfoEnabled)
+            {
+                this.eqtTrace.Info("Initializing {0} with configuration: {1}", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);
+            }
 
             // Store input variables
             this.events = events;
-            this.logger = logger;
-            this.dataCollectorContext = environmentContext.SessionDataCollectionContext;
-            this.settings = new CoverletSettings(configurationElement);
-            this.coverageManager = new CoverageManager(this.settings);
-            this.attachmentManager = new AttachmentManager(dataSink);
+            this.configurationElement = configurationElement;
+            this.dataSink = dataSink;
+            this.dataCollectionContext = environmentContext.SessionDataCollectionContext;
+            this.logger = new CoverletLogger(logger, this.dataCollectionContext);
 
             // Register events
             this.events.SessionStart += this.OnSessionStart;
             this.events.SessionEnd += this.OnSessionEnd;
-
-            // Start instrumentation async
-            this.coverageManager.StartInstrumentationAsync(); // TODO: as we are not awaiting, errors in this async will be eaten up. Ensure the error cases works as expected.
         }
 
         protected override void Dispose(bool disposing)
         {
-            // TODO: Ensure that all files are cleaned up. Ideally this will be done by sessionend. Check if we can have a case where dispose is called before sessionend call. If yes, we need to cleanup here as well.
-            // TODO: check if this method is ever invoked.
+            this.eqtTrace.Verbose("{0}: Disposing", CoverletConstants.DataCollectorName);
+
             // Unregister events
-            this.events.SessionStart -= this.OnSessionStart;
-            this.events.SessionEnd -= this.OnSessionEnd;
+            if (this.events != null)
+            {
+                this.events.SessionStart -= this.OnSessionStart;
+                this.events.SessionEnd -= this.OnSessionEnd;
+            }
 
-            this.coverageManager.Dispose();
-            this.attachmentManager.Dispose();
-
-            // Call base dispose
+            // Dispose
+            this.attachmentManager?.Dispose();
             base.Dispose(disposing);
         }
 
-        private void OnSessionStart(object sender, SessionStartEventArgs e)
+        private void OnSessionStart(object sender, SessionStartEventArgs sessionStartEventArgs)
         {
-            this.coverageManager.WaitForInstrumentationComplete();
+            this.eqtTrace.Verbose("{0}: SessionStart received", CoverletConstants.DataCollectorName);
+
+            // Get coverlet settings
+            IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
+            var coverletSettingsParser = new CoverletSettingsParser(this.logger, this.eqtTrace);
+            var coverletSettings = coverletSettingsParser.Parse(this.configurationElement, testModules);
+
+            // Get coverage and attachment managers
+            this.coverageManager = new CoverageManager(coverletSettings, this.logger, this.eqtTrace);
+            this.attachmentManager = new AttachmentManager(dataSink, this.dataCollectionContext, this.logger, this.eqtTrace, this.GetReportFileName());
+            
+            // Start instrumentation
+            this.coverageManager.StartInstrumentation();
+        }
+
+        private string GetReportFileName()
+        {
+            var fileName = CoverletConstants.DefaultFileName;
+            var extension = this.coverageManager.Reporter.Extension;
+
+            return $"{fileName}.{extension}";
         }
 
         private void OnSessionEnd(object sender, SessionEndEventArgs e)
         {
-            CoverageResult coverageResult = this.coverageManager.GetCoverageResult();
-            this.attachmentManager.CreateAndSendCoverageAttachments(coverageResult);
+            this.eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
+
+            // Get coverage reports
+            var coverageReport = this.coverageManager.GetCoverageReport();
+
+            // Send result attachments to test platform.
+            this.attachmentManager.SendCoverageReport(coverageReport);
+        }
+
+        private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
+        {
+            var testModules = sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>("TestSources");
+            if (this.eqtTrace.IsInfoEnabled)
+            {
+                this.eqtTrace.Info("{0}: TestModules: {1}", CoverletConstants.DataCollectorName, string.Join(",", testModules));
+            }
+
+            return testModules;
         }
     }
 }
