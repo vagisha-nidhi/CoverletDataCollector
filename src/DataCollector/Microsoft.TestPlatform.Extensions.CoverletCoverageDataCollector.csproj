@@ -5,12 +5,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.0.1" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.0.1-preview-20190325-01" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="coverlet.core">
       <HintPath>C:\Users\abhishk\.nuget\packages\coverlet.msbuild\2.5.1\build\netstandard2.0\coverlet.core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
