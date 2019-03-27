@@ -1,0 +1,20 @@
+TODOs of coverlet data collector:
+1. create different folders in sln if necessary. Example: moving fileHelper class in Utilities folder.
+2. check if logs, eqttrace are actually appearing in actual (they might come in unit testing but not in actual)
+3. Resource localization??
+4. add comments
+5. what happens if in actual Configuration element is not passed in runsettings?
+6. Run all and run selected scenarios
+7. Test VS, pipeline and command line
+8. Check if we can change the attachment name in existing data collectors, If yes, do here as well.
+9. we are logging errors and warnings everywhere. Think about info logs as well for both logging and for tracing.
+10. Check where to use IsErrorEnabled. Example: in case of some calculations
+11. What happens if an event is done "-=" more than once? Do we throw error? If yes, we can encounter that case. Example in case of Dispose of attachmentManager.
+12. CoverageManager.GetCoverageResult:
+	i. CoverageResult value can be null in case of exception (only if test platform doesn't exit in case of logging error. Verify this.)
+  ii. Also checks what happens of GetCoverageResult is called before calling PrepareModules OR called even if PrepareModules fails.
+13. Test for linux and mac
+14. Remove IsWarningEnabled from code which are not used anywhere in the code.
+15. What happens in case coverlet throws error while instrumentation or while coverage collection. Are we able to forward it properly?
+16. we are doing configurationElement[CoverletConstants.IncludeFiltersElementName], check if casing matters here. In runsettings change the casing.
+14. Check if all the traces and logs are printed properly. Specially CoverletSettings.ToString() override.
