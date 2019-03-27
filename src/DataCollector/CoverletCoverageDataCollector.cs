@@ -90,9 +90,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         private string GetReportFileName()
         {
             var fileName = CoverletConstants.DefaultFileName;
-            var extension = this.coverageManager.Reporter.Extension;
+            var extension = this.coverageManager?.Reporter.Extension;
 
-            return $"{fileName}.{extension}";
+            return extension == null ? fileName : $"{fileName}.{extension}";
         }
 
         private void OnSessionEnd(object sender, SessionEndEventArgs e)
@@ -100,10 +100,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
 
             // Get coverage reports
-            var coverageReport = this.coverageManager.GetCoverageReport();
+            var coverageReport = this.coverageManager?.GetCoverageReport();
+            if (coverageReport == null) return;
 
             // Send result attachments to test platform.
-            this.attachmentManager.SendCoverageReport(coverageReport);
+            this.attachmentManager?.SendCoverageReport(coverageReport);
         }
 
         private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
