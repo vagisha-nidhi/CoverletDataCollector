@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector
+namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCollector
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Xml;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
 
     internal class CoverletSettingsParser
     {
@@ -38,7 +40,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector
 
             if (this.eqtTrace.IsVerboseEnabled)
             {
-                this.eqtTrace.Verbose("{0} - Initializing coverlet process with settings: {1}", CoverletConstants.DataCollectorName, coverletSettings.ToString());
+                this.eqtTrace.Verbose("{0}: Initializing coverlet process with settings: {1}", CoverletConstants.DataCollectorName, coverletSettings.ToString());
             }
 
             return coverletSettings;

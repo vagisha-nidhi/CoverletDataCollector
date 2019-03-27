@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector
+namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCollector
 {
     using System;
     using Coverlet.Core;
     using Coverlet.Core.Reporters;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
 
     internal class CoverageManager
     {
