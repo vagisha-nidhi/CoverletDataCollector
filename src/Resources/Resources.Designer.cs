@@ -62,7 +62,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resour
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to get coverage report.
+        ///   Looks up a localized string similar to {0}: Failed to get coverage report.
         /// </summary>
         internal static string CoverageReportException {
             get {
@@ -71,7 +71,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resour
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to get coverage result.
+        ///   Looks up a localized string similar to {0}: Failed to get coverage result.
         /// </summary>
         internal static string CoverageResultException {
             get {
@@ -80,7 +80,16 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resour
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to save coverage report.
+        ///   Looks up a localized string similar to {0}: Failed to cleanup report directory: &apos;{1}&apos;.
+        /// </summary>
+        internal static string FailedToCleanupReportDirectory {
+            get {
+                return ResourceManager.GetString("FailedToCleanupReportDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: Failed to save coverage report &apos;{1}&apos; in directory &apos;{2}&apos;.
         /// </summary>
         internal static string FailedToSaveCoverageReport {
             get {
@@ -89,7 +98,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resour
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to instrument modules.
+        ///   Looks up a localized string similar to {0}: Failed to instrument modules.
         /// </summary>
         internal static string InstrumentationException {
             get {
@@ -98,7 +107,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resour
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No test modules found.
+        ///   Looks up a localized string similar to {0}: No test modules found.
         /// </summary>
         internal static string NoTestModulesFound {
             get {

@@ -12,24 +12,18 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     internal class CoverageManager
     {
         private readonly Coverage coverage;
-        private readonly CoverletLogger logger;
-        private readonly CoverletEqtTrace eqtTrace;
 
         public IReporter Reporter { get; }
 
-        public CoverageManager(CoverletSettings settings, CoverletLogger logger, CoverletEqtTrace eqtTrace)
+        public CoverageManager(CoverletSettings settings)
             : this (settings,
-                  logger,
-                  eqtTrace,
                   new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter())
         {
         }
 
-        public CoverageManager(CoverletSettings settings, CoverletLogger logger, CoverletEqtTrace eqtTrace, IReporter reporter)
+        public CoverageManager(CoverletSettings settings, IReporter reporter)
         {
             // Store input vars
-            this.logger = logger;
-            this.eqtTrace = eqtTrace;
             this.Reporter = reporter;
 
             // Coverage object
@@ -53,8 +47,8 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
             catch (Exception ex)
             {
-                this.eqtTrace.Error("{0}: Failed to instrument modules with exception {1}", CoverletConstants.DataCollectorName, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.InstrumentationException, ex));
+                var errorMessage = string.Format(Resources.InstrumentationException, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
 
@@ -62,7 +56,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             // Get coverage result
             var coverageResult = this.GetCoverageResult();
-            if (coverageResult == null) return null;
 
             // Get coverage report in default format
             var coverageReport = this.GetCoverageReport(coverageResult);
@@ -77,11 +70,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
             catch (Exception ex)
             {
-                this.eqtTrace.Error("{0}: Failed to get coverage result with exception {1}", CoverletConstants.DataCollectorName, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.CoverageResultException, ex));
+                var errorMessage = string.Format(Resources.CoverageResultException, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
-
-            return default(CoverageResult);
         }
 
         private string GetCoverageReport(CoverageResult coverageResult)
@@ -91,13 +82,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 return this.Reporter.Report(coverageResult);
             }
             catch (Exception ex)
-
             {
-                this.eqtTrace.Error("{0}: Failed to get {1} report with exception {2}", CoverletConstants.DataCollectorName, this.Reporter.Format, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.CoverageResultException, ex));
+                var errorMessage = string.Format(Resources.CoverageReportException, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
-
-            return default(string);
         }
     }
 }

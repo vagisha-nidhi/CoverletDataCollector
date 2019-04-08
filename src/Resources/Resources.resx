@@ -118,18 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CoverageReportException" xml:space="preserve">
-    <value>Failed to get coverage report</value>
+    <value>{0}: Failed to get coverage report</value>
   </data>
   <data name="CoverageResultException" xml:space="preserve">
-    <value>Failed to get coverage result</value>
+    <value>{0}: Failed to get coverage result</value>
+  </data>
+  <data name="FailedToCleanupReportDirectory" xml:space="preserve">
+    <value>{0}: Failed to cleanup report directory: '{1}'</value>
   </data>
   <data name="FailedToSaveCoverageReport" xml:space="preserve">
-    <value>Failed to save coverage report</value>
+    <value>{0}: Failed to save coverage report '{1}' in directory '{2}'</value>
   </data>
   <data name="InstrumentationException" xml:space="preserve">
-    <value>Failed to instrument modules</value>
+    <value>{0}: Failed to instrument modules</value>
   </data>
   <data name="NoTestModulesFound" xml:space="preserve">
-    <value>No test modules found</value>
+    <value>{0}: No test modules found</value>
   </data>
 </root>

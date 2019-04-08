@@ -1,5 +1,4 @@
 TODOs of coverlet data collector:
-1. create different folders in sln if necessary. Example: moving fileHelper class in Utilities folder.
 2. check if logs, eqttrace are actually appearing in actual (they might come in unit testing but not in actual)
 3. Resource localization??
 4. add comments
@@ -18,3 +17,25 @@ TODOs of coverlet data collector:
 15. What happens in case coverlet throws error while instrumentation or while coverage collection. Are we able to forward it properly?
 16. we are doing configurationElement[CoverletConstants.IncludeFiltersElementName], check if casing matters here. In runsettings change the casing.
 14. Check if all the traces and logs are printed properly. Specially CoverletSettings.ToString() override.
+15. If any error like, missingmethodexception, then OnSessionStart doesn't log it anywhere. we should trace it.
+19. Acceptance tests to write:
+		a. vstest.console with dll: without runsettings
+		b. dotnet test or dotnet vstest: without runsettings
+		c. dotnet test or dotnet vstest: with runsettings
+20. Correctness UTs or functional tests: Copy from coverlet
+21. Try with multiple test sources in both vstest.console.exe and dotnet test that only one test source is coming to collector. Do the same for multiple test cases with different test sources as well.
+22. We are getting exception like: "Data collector 'XPlat code coverage' message: Data collector caught an exception of type 'Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities.CoverletDataCollectorException': 'Failed to instrument modules'. More details: ..""
+We should print inner exception to prevent such cases.
+
+
+Scenarios:
+validations
+1. dotnet test with --collect:"XPlat code coverage"
+		i. Windows:
+		     a. Coverage file is getting generated.
+				    Note: Only XML file generation supported by coverlet
+				 b. Check eqttrace logs:
+				 c. Check logger logs:
+		ii. Linux:
+		     a. make a table
+2. dotnet test with different casing --collect:"xpLAt coDe coveraGE"

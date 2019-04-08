@@ -3,6 +3,7 @@
 
 namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCollector
 {
+    using System.Linq;
     using System.Text;
 
     internal class CoverletSettings
@@ -27,14 +28,14 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             var builder = new StringBuilder();
 
-            builder.AppendFormat("TestModule: {0}", this.TestModule);
-            builder.AppendFormat("IncludeFilters: {0}", string.Join(",", this.IncludeFilters));
-            builder.AppendFormat("IncludeDirectories: {0}", string.Join(",", this.IncludeDirectories));
-            builder.AppendFormat("ExcludeFilters: {0}", string.Join(",", this.ExcludeFilters));
-            builder.AppendFormat("ExcludeSourceFiles: {0}", string.Join(",", this.ExcludeSourceFiles));
-            builder.AppendFormat("ExcludeAttributes: {0}", string.Join(",", this.ExcludeAttributes));
-            builder.AppendFormat("MergeWith: {0}", this.MergeWith);
-            builder.AppendFormat("UseSourceLink: {0}", this.UseSourceLink);
+            builder.AppendFormat("TestModule: '{0}', ", this.TestModule);
+            builder.AppendFormat("IncludeFilters: '{0}', ", string.Join(",", this.IncludeFilters ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("IncludeDirectories: '{0}', ", string.Join(",", this.IncludeDirectories ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("ExcludeFilters: '{0}', ", string.Join(",", this.ExcludeFilters ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("ExcludeSourceFiles: '{0}', ", string.Join(",", this.ExcludeSourceFiles ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("ExcludeAttributes: '{0}', ", string.Join(",", this.ExcludeAttributes ?? Enumerable.Empty<string>()));
+            builder.AppendFormat("MergeWith: '{0}', ", this.MergeWith);
+            builder.AppendFormat("UseSourceLink: '{0}'", this.UseSourceLink);
 
             return builder.ToString();
         }

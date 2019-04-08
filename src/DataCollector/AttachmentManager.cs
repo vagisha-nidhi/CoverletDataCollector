@@ -5,6 +5,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 {
     using System;
     using System.ComponentModel;
+    using System.IO;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
@@ -12,36 +13,36 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     internal class AttachmentManager : IDisposable
     {
         private readonly DataCollectionSink dataSink;
-        private readonly CoverletLogger logger;
         private readonly CoverletEqtTrace eqtTrace;
         private readonly DataCollectionContext dataCollectionContext;
         private readonly FileHelper fileHelper;
+        private readonly DirectoryHelper directoryHelper;
         private readonly string reportFileName;
         private readonly string reportDirectory;
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, CoverletLogger logger, CoverletEqtTrace eqtTrace, string reportFileName)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, CoverletEqtTrace eqtTrace, string reportFileName)
             : this(dataSink,
                   dataCollectionContext,
-                  logger,
                   eqtTrace,
                   reportFileName,
                   Guid.NewGuid().ToString(),
-                  new FileHelper())
+                  new FileHelper(),
+                  new DirectoryHelper())
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, CoverletLogger logger, CoverletEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, FileHelper fileHelper)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, CoverletEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, FileHelper fileHelper, DirectoryHelper directoryHelper)
         {
             // Store input vars
             this.dataSink = dataSink;
             this.dataCollectionContext = dataCollectionContext;
-            this.logger = logger;
             this.eqtTrace = eqtTrace;
             this.reportFileName = reportFileName;
             this.fileHelper = fileHelper;
+            this.directoryHelper = directoryHelper;
 
             // Report directory to store the coverage reports.
-            this.reportDirectory = this.fileHelper.Combine(this.fileHelper.GetTempPath(), reportDirectoryName);
+            this.reportDirectory = Path.Combine(Path.GetTempPath(), reportDirectoryName);
 
             // Register events
             this.dataSink.SendFileCompleted += this.OnSendFileCompleted;
@@ -59,7 +60,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             // Save coverage report to file
             var coverageReportPath = this.SaveCoverageReport(coverageReport);
-            if (string.IsNullOrWhiteSpace(coverageReportPath)) return;
 
             // Send coverage attachment to test platform.
             this.SendAttachment(coverageReportPath);
@@ -75,20 +75,18 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             try
             {
-                this.fileHelper.CreateDirectory(this.reportDirectory);
-                var filePath = this.fileHelper.Combine(this.reportDirectory, this.reportFileName);
+                this.directoryHelper.CreateDirectory(this.reportDirectory);
+                var filePath = Path.Combine(this.reportDirectory, this.reportFileName);
                 this.fileHelper.WriteAllText(filePath, report);
-                this.eqtTrace.Info("{0}: Saved coverage report to path: {1}", CoverletConstants.DataCollectorName, filePath);
+                this.eqtTrace.Info("{0}: Saved coverage report to path: '{1}'", CoverletConstants.DataCollectorName, filePath);
 
                 return filePath;
             }
             catch (Exception ex)
             {
-                this.eqtTrace.Error("{0}: Failed to save coverage report to file: {1} in directory: {2} with exception {3}", CoverletConstants.DataCollectorName, this.reportFileName, this.reportDirectory, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.FailedToSaveCoverageReport, ex));
+                var errorMessage = string.Format(Resources.FailedToSaveCoverageReport, CoverletConstants.DataCollectorName, this.reportFileName, this.reportDirectory);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
-
-            return default(string);
         }
 
         private void SendAttachment(string attachmentPath)
@@ -105,15 +103,16 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             try
             {
-                if (this.fileHelper.Exists(this.reportDirectory))
+                if (this.directoryHelper.Exists(this.reportDirectory))
                 {
-                    this.fileHelper.Delete(this.reportDirectory, true);
-                    this.eqtTrace.Verbose("{0}: Deleted report directory: {1}", CoverletConstants.DataCollectorName, this.reportDirectory);
+                    this.directoryHelper.Delete(this.reportDirectory, true);
+                    this.eqtTrace.Verbose("{0}: Deleted report directory: '{1}'", CoverletConstants.DataCollectorName, this.reportDirectory);
                 }
             }
             catch (Exception ex)
             {
-                this.eqtTrace.Warning("{0}: Failed to delete report directory: {1} with exception {2}", CoverletConstants.DataCollectorName, this.reportDirectory, ex);
+                var errorMessage = string.Format(Resources.FailedToCleanupReportDirectory, CoverletConstants.DataCollectorName, this.reportDirectory);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
     }

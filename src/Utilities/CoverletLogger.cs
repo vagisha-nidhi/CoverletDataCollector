@@ -3,7 +3,6 @@
 
 namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities
 {
-    using System;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
     internal class CoverletLogger
@@ -17,9 +16,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
             this.dataCollectionContext = dataCollectionContext;
         }
 
-        public void LogError(Exception exception)
+        public void LogWarning(string warning)
         {
-            this.logger.LogError(this.dataCollectionContext, exception);
+            this.logger.LogWarning(this.dataCollectionContext, warning);
         }
     }
 }

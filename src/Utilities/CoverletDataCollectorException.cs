@@ -5,7 +5,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
 {
     using System;
 
-    [Serializable]
     internal class CoverletDataCollectorException : Exception
     {
         public CoverletDataCollectorException(string message) : base(message)

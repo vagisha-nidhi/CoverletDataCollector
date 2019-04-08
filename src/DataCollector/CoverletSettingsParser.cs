@@ -11,12 +11,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
     internal class CoverletSettingsParser
     {
-        private readonly CoverletLogger logger;
         private readonly CoverletEqtTrace eqtTrace;
 
-        public CoverletSettingsParser(CoverletLogger logger, CoverletEqtTrace eqtTrace)
+        public CoverletSettingsParser(CoverletEqtTrace eqtTrace)
         {
-            this.logger = logger;
             this.eqtTrace = eqtTrace;
         }
 
@@ -40,7 +38,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
             if (this.eqtTrace.IsVerboseEnabled)
             {
-                this.eqtTrace.Verbose("{0}: Initializing coverlet process with settings: {1}", CoverletConstants.DataCollectorName, coverletSettings.ToString());
+                this.eqtTrace.Verbose("{0}: Initializing coverlet process with settings: \"{1}\"", CoverletConstants.DataCollectorName, coverletSettings.ToString());
             }
 
             return coverletSettings;
@@ -51,14 +49,14 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             // Validate if atleast one source present.
             if (testModules == null || !testModules.Any())
             {
-                this.eqtTrace.Error("{0}: No test modules found", CoverletConstants.DataCollectorName);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.NoTestModulesFound));
+                var errorMessage = string.Format(Resources.NoTestModulesFound, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage);
             }
 
             // Note:
             // 1) .NET core test run supports one testModule per run. Coverlet also supports one testModule per run. So, we are using first testSource only and ignoring others.
             // 2) If and when .NET full is supported with coverlet OR .NET core starts supporting multiple testModules, revisit this code to use other testModules as well.
-            return testModules?.FirstOrDefault();
+            return testModules.FirstOrDefault();
         }
 
         private string[] ParseIncludeFilters(XmlElement configurationElement)
