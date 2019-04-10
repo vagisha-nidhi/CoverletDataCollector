@@ -11,9 +11,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
     internal class CoverletSettingsParser
     {
-        private readonly CoverletEqtTrace eqtTrace;
+        private readonly TestPlatformEqtTrace eqtTrace;
 
-        public CoverletSettingsParser(CoverletEqtTrace eqtTrace)
+        public CoverletSettingsParser(TestPlatformEqtTrace eqtTrace)
         {
             this.eqtTrace = eqtTrace;
         }
@@ -34,6 +34,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 coverletSettings.ExcludeAttributes = this.ParseExcludeAttributes(configurationElement);
                 coverletSettings.MergeWith = this.ParseMergeWith(configurationElement);
                 coverletSettings.UseSourceLink = this.ParseUseSourceLink(configurationElement);
+                coverletSettings.SingleHit = this.ParseSingleHit(configurationElement);
             }
 
             if (this.eqtTrace.IsVerboseEnabled)
@@ -100,6 +101,13 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             var useSourceLinkElement = configurationElement[CoverletConstants.UseSourceLinkElementName];
             bool.TryParse(useSourceLinkElement?.InnerText, out var useSourceLink);
             return useSourceLink;
+        }
+
+        private bool ParseSingleHit(XmlElement configurationElement)
+        {
+            var singleHitElement = configurationElement[CoverletConstants.SingleHitElementName];
+            bool.TryParse(singleHitElement?.InnerText, out var singleHit);
+            return singleHit;
         }
     }
 }

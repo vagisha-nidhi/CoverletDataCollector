@@ -15,20 +15,20 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
     public class CoverletCoverageDataCollector : DataCollector
     {
-        private readonly CoverletEqtTrace eqtTrace;
+        private readonly TestPlatformEqtTrace eqtTrace;
         private DataCollectionEvents events;
-        private CoverletLogger logger;
+        private TestPlatformLogger logger;
         private XmlElement configurationElement;
         private DataCollectionSink dataSink;
         private DataCollectionContext dataCollectionContext;
         private CoverageManager coverageManager;
         private AttachmentManager attachmentManager;
 
-        public CoverletCoverageDataCollector() : this(new CoverletEqtTrace())
+        public CoverletCoverageDataCollector() : this(new TestPlatformEqtTrace())
         {
         }
 
-        private CoverletCoverageDataCollector(CoverletEqtTrace eqtTrace) : base()
+        private CoverletCoverageDataCollector(TestPlatformEqtTrace eqtTrace) : base()
         {
             this.eqtTrace = eqtTrace;
         }
@@ -50,7 +50,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.configurationElement = configurationElement;
             this.dataSink = dataSink;
             this.dataCollectionContext = environmentContext.SessionDataCollectionContext;
-            this.logger = new CoverletLogger(logger, this.dataCollectionContext);
+            this.logger = new TestPlatformLogger(logger, this.dataCollectionContext);
 
             // Register events
             this.events.SessionStart += this.OnSessionStart;
@@ -94,7 +94,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 var coverletSettings = coverletSettingsParser.Parse(this.configurationElement, testModules);
 
                 // Get coverage and attachment managers
-                this.coverageManager = new CoverageManager(coverletSettings);
+                this.coverageManager = new CoverageManager(coverletSettings, this.eqtTrace, this.logger);
                 this.attachmentManager = new AttachmentManager(dataSink, this.dataCollectionContext, this.eqtTrace, this.GetReportFileName());
 
                 // Start instrumentation

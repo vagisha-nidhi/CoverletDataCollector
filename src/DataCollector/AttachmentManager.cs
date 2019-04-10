@@ -12,14 +12,14 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     internal class AttachmentManager
     {
         private readonly DataCollectionSink dataSink;
-        private readonly CoverletEqtTrace eqtTrace;
+        private readonly TestPlatformEqtTrace eqtTrace;
         private readonly DataCollectionContext dataCollectionContext;
         private readonly FileHelper fileHelper;
         private readonly DirectoryHelper directoryHelper;
         private readonly string reportFileName;
         private readonly string reportDirectory;
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, CoverletEqtTrace eqtTrace, string reportFileName)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformEqtTrace eqtTrace, string reportFileName)
             : this(dataSink,
                   dataCollectionContext,
                   eqtTrace,
@@ -30,7 +30,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, CoverletEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, FileHelper fileHelper, DirectoryHelper directoryHelper)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, FileHelper fileHelper, DirectoryHelper directoryHelper)
         {
             // Store input vars
             this.dataSink = dataSink;

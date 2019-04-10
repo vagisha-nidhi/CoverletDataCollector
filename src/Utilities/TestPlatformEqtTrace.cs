@@ -5,7 +5,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
 {
     using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-    internal class CoverletEqtTrace
+    internal class TestPlatformEqtTrace
     {
         public bool IsInfoEnabled => EqtTrace.IsInfoEnabled;
         public bool IsVerboseEnabled => EqtTrace.IsVerboseEnabled;
@@ -13,6 +13,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
         public void Verbose(string format, params object[] args)
         {
             EqtTrace.Verbose(format, args);
+        }
+
+        public void Warning(string format, params object[] args)
+        {
+            EqtTrace.Warning(format, args);
         }
 
         public void Info(string format, params object[] args)

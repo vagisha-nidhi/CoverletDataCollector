@@ -24,6 +24,8 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
         public bool UseSourceLink { get; set; }
 
+        public bool SingleHit { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -36,6 +38,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             builder.AppendFormat("ExcludeAttributes: '{0}', ", string.Join(",", this.ExcludeAttributes ?? Enumerable.Empty<string>()));
             builder.AppendFormat("MergeWith: '{0}', ", this.MergeWith);
             builder.AppendFormat("UseSourceLink: '{0}'", this.UseSourceLink);
+            builder.AppendFormat("SingleHit: '{0}'", this.SingleHit);
 
             return builder.ToString();
         }

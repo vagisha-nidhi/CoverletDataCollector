@@ -9,7 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="coverlet.core">
-      <HintPath>C:\Users\abhishk\.nuget\packages\coverlet.msbuild\2.5.1\build\netstandard2.0\coverlet.core.dll</HintPath>
+      <HintPath>C:\Users\abhishk\.nuget\packages\coverlet.msbuild\2.6.0\build\netstandard2.0\coverlet.core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -5,12 +5,12 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
 {
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
-    internal class CoverletLogger
+    internal class TestPlatformLogger
     {
         private readonly DataCollectionLogger logger;
         private readonly DataCollectionContext dataCollectionContext;
 
-        public CoverletLogger(DataCollectionLogger logger, DataCollectionContext dataCollectionContext)
+        public TestPlatformLogger(DataCollectionLogger logger, DataCollectionContext dataCollectionContext)
         {
             this.logger = logger;
             this.dataCollectionContext = dataCollectionContext;

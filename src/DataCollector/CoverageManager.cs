@@ -5,6 +5,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 {
     using System;
     using Coverlet.Core;
+    using Coverlet.Core.Logging;
     using Coverlet.Core.Reporters;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
@@ -15,13 +16,14 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
         public IReporter Reporter { get; }
 
-        public CoverageManager(CoverletSettings settings)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
             : this (settings,
-                  new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter())
+                  new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter(),
+                  new CoverletLogger(eqtTrace, logger))
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IReporter reporter)
+        public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger coverletLogger)
         {
             // Store input vars
             this.Reporter = reporter;
@@ -34,8 +36,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 settings.ExcludeFilters,
                 settings.ExcludeSourceFiles,
                 settings.ExcludeAttributes,
+                settings.SingleHit,
                 settings.MergeWith,
-                settings.UseSourceLink);
+                settings.UseSourceLink,
+                coverletLogger);
         }
 
         public void StartInstrumentation()
