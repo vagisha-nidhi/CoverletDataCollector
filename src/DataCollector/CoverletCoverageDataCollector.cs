@@ -5,6 +5,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Xml;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
@@ -39,7 +40,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             DataCollectionLogger logger,
             DataCollectionEnvironmentContext environmentContext)
         {
-            System.Diagnostics.Debugger.Launch();
             if (this.eqtTrace.IsInfoEnabled)
             {
                 this.eqtTrace.Info("Initializing {0} with configuration: '{1}'", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);
@@ -55,6 +55,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             // Register events
             this.events.SessionStart += this.OnSessionStart;
             this.events.SessionEnd += this.OnSessionEnd;
+            this.dataSink.SendFileCompleted += this.OnSendFileCompleted;
         }
 
         protected override void Dispose(bool disposing)
@@ -67,12 +68,14 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 this.events.SessionStart -= this.OnSessionStart;
                 this.events.SessionEnd -= this.OnSessionEnd;
             }
-
-            // Dispose
-            this.attachmentManager?.Dispose();
+            if (this.dataSink != null)
+            {
+                this.dataSink.SendFileCompleted -= this.OnSendFileCompleted;
+            }
 
             // Remove vars
             this.events = null;
+            this.dataSink = null;
             this.coverageManager = null;
             this.attachmentManager = null;
 
@@ -99,8 +102,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
             catch(Exception ex)
             {
-                // TODO: inner exception
-                // TODO: anything special for CoverletException type or generic exception type. Do similar in session end as well.
                 this.logger.LogWarning(ex.ToString());
                 this.Dispose(true);
             }
@@ -117,6 +118,20 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
                 // Send result attachments to test platform.
                 this.attachmentManager?.SendCoverageReport(coverageReport);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogWarning(ex.ToString());
+                this.Dispose(true);
+            }
+        }
+
+        public void OnSendFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            try
+            {
+                this.eqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
+                this.attachmentManager?.OnSendFileCompleted();
             }
             catch (Exception ex)
             {

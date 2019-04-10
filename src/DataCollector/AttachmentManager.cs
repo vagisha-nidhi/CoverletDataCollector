@@ -4,13 +4,12 @@
 namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCollector
 {
     using System;
-    using System.ComponentModel;
     using System.IO;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
-    internal class AttachmentManager : IDisposable
+    internal class AttachmentManager
     {
         private readonly DataCollectionSink dataSink;
         private readonly CoverletEqtTrace eqtTrace;
@@ -43,17 +42,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
             // Report directory to store the coverage reports.
             this.reportDirectory = Path.Combine(Path.GetTempPath(), reportDirectoryName);
-
-            // Register events
-            this.dataSink.SendFileCompleted += this.OnSendFileCompleted;
-        }
-
-        public void Dispose()
-        {
-            if (this.dataSink != null)
-            {
-                this.dataSink.SendFileCompleted -= this.OnSendFileCompleted;
-            }
         }
 
         public void SendCoverageReport(string coverageReport)
@@ -65,9 +53,8 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.SendAttachment(coverageReportPath);
         }
 
-        private void OnSendFileCompleted(object sender, AsyncCompletedEventArgs e)
+        public void OnSendFileCompleted()
         {
-            this.eqtTrace.Verbose("{0}: OnSendFileCompleted received", CoverletConstants.DataCollectorName);
             this.CleanupReportDirectory();
         }
 
