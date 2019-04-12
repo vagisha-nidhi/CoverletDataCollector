@@ -5,7 +5,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
     using System.Xml;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
@@ -22,7 +21,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         private DataCollectionSink dataSink;
         private DataCollectionContext dataCollectionContext;
         private CoverageManager coverageManager;
-        private AttachmentManager attachmentManager;
 
         public CoverletCoverageDataCollector() : this(new TestPlatformEqtTrace())
         {
@@ -55,7 +53,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             // Register events
             this.events.SessionStart += this.OnSessionStart;
             this.events.SessionEnd += this.OnSessionEnd;
-            this.dataSink.SendFileCompleted += this.OnSendFileCompleted;
         }
 
         protected override void Dispose(bool disposing)
@@ -68,16 +65,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 this.events.SessionStart -= this.OnSessionStart;
                 this.events.SessionEnd -= this.OnSessionEnd;
             }
-            if (this.dataSink != null)
-            {
-                this.dataSink.SendFileCompleted -= this.OnSendFileCompleted;
-            }
 
             // Remove vars
             this.events = null;
             this.dataSink = null;
             this.coverageManager = null;
-            this.attachmentManager = null;
 
             base.Dispose(disposing);
         }
@@ -95,7 +87,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 
                 // Get coverage and attachment managers
                 this.coverageManager = new CoverageManager(coverletSettings, this.eqtTrace, this.logger);
-                this.attachmentManager = new AttachmentManager(dataSink, this.dataCollectionContext, this.eqtTrace, this.GetReportFileName());
 
                 // Start instrumentation
                 this.coverageManager.StartInstrumentation();
@@ -117,21 +108,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 var coverageReport = this.coverageManager?.GetCoverageReport();
 
                 // Send result attachments to test platform.
-                this.attachmentManager?.SendCoverageReport(coverageReport);
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogWarning(ex.ToString());
-                this.Dispose(true);
-            }
-        }
-
-        public void OnSendFileCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            try
-            {
-                this.eqtTrace.Verbose("{0}: SendFileCompleted received", CoverletConstants.DataCollectorName);
-                this.attachmentManager?.OnSendFileCompleted();
+                using(var attachmentManager = new AttachmentManager(dataSink, this.dataCollectionContext, this.logger, this.eqtTrace, this.GetReportFileName()))
+                {
+                    attachmentManager?.SendCoverageReport(coverageReport);
+                }
             }
             catch (Exception ex)
             {
