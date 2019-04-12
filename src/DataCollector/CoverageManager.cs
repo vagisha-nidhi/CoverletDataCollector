@@ -10,6 +10,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
 
+    /// <summary>
+    /// Manages coverlet coverage
+    /// </summary>
     internal class CoverageManager
     {
         private readonly Coverage coverage;
@@ -42,7 +45,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 coverletLogger);
         }
 
-        public void StartInstrumentation()
+        /// <summary>
+        /// Instrument modules
+        /// </summary>
+        public void InstrumentModules()
         {
             try
             {
@@ -56,6 +62,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// Gets coverlet coverage report
+        /// </summary>
+        /// <returns>Coverage report</returns>
         public string GetCoverageReport()
         {
             // Get coverage result
@@ -66,6 +76,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             return coverageReport;
         }
 
+        /// <summary>
+        /// Gets coverlet coverage result
+        /// </summary>
+        /// <returns>Coverage result</returns>
         private CoverageResult GetCoverageResult()
         {
             try
@@ -79,6 +93,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// Gets coverage report from coverage result
+        /// </summary>
+        /// <param name="coverageResult">Coverage result</param>
+        /// <returns>Coverage report</returns>
         private string GetCoverageReport(CoverageResult coverageResult)
         {
             try

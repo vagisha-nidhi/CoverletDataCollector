@@ -5,6 +5,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
 {
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+    /// <summary>
+    /// Test platform logger
+    /// </summary>
     internal class TestPlatformLogger
     {
         private readonly DataCollectionLogger logger;
@@ -16,6 +19,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
             this.dataCollectionContext = dataCollectionContext;
         }
 
+        /// <summary>
+        /// Log warning
+        /// </summary>
+        /// <param name="warning">Warning message</param>
         public void LogWarning(string warning)
         {
             this.logger.LogWarning(this.dataCollectionContext, warning);

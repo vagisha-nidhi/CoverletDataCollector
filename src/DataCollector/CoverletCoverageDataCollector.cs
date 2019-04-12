@@ -10,6 +10,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+    /// <summary>
+    /// Coverlet coverage out-proc data collector.
+    /// </summary>
     [DataCollectorTypeUri(CoverletConstants.DefaultUri)]
     [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
     public class CoverletCoverageDataCollector : DataCollector
@@ -31,6 +34,14 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.eqtTrace = eqtTrace;
         }
 
+        /// <summary>
+        /// Initializes data collector
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <param name="events">Events to register on</param>
+        /// <param name="dataSink">Data sink to send attachments to test platform</param>
+        /// <param name="logger">Test platform logger</param>
+        /// <param name="environmentContext">Environment context</param>
         public override void Initialize(
             XmlElement configurationElement,
             DataCollectionEvents events,
@@ -55,6 +66,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.events.SessionEnd += this.OnSessionEnd;
         }
 
+        /// <summary>
+        /// Disposes the data collector
+        /// </summary>
+        /// <param name="disposing">Disposing flag</param>
         protected override void Dispose(bool disposing)
         {
             this.eqtTrace.Verbose("{0}: Disposing", CoverletConstants.DataCollectorName);
@@ -74,6 +89,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// SessionStart event handler
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="sessionStartEventArgs">Event args</param>
         private void OnSessionStart(object sender, SessionStartEventArgs sessionStartEventArgs)
         {
             this.eqtTrace.Verbose("{0}: SessionStart received", CoverletConstants.DataCollectorName);
@@ -88,8 +108,8 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 // Get coverage and attachment managers
                 this.coverageManager = new CoverageManager(coverletSettings, this.eqtTrace, this.logger);
 
-                // Start instrumentation
-                this.coverageManager.StartInstrumentation();
+                // Instrument modules
+                this.coverageManager.InstrumentModules();
             }
             catch(Exception ex)
             {
@@ -98,6 +118,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// SessionEnd event handler
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event args</param>
         private void OnSessionEnd(object sender, SessionEndEventArgs e)
         {
             try
@@ -120,6 +145,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// Gets coverage report file name
+        /// </summary>
+        /// <returns>Coverage report file name</returns>
         private string GetReportFileName()
         {
             var fileName = CoverletConstants.DefaultFileName;
@@ -128,6 +157,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             return extension == null ? fileName : $"{fileName}.{extension}";
         }
 
+        /// <summary>
+        /// Gets test modules
+        /// </summary>
+        /// <param name="sessionStartEventArgs">Event args</param>
+        /// <returns>Test modules list</returns>
         private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
         {
             var testModules = sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);

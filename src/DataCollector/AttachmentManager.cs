@@ -10,6 +10,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+    /// <summary>
+    /// Manages coverage report attachments
+    /// </summary>
     internal class AttachmentManager : IDisposable
     {
         private readonly DataCollectionSink dataSink;
@@ -51,6 +54,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.dataSink.SendFileCompleted += this.OnSendFileCompleted;
         }
 
+        /// <summary>
+        /// Sends coverage report to test platform
+        /// </summary>
+        /// <param name="coverageReport">Coverage report</param>
         public void SendCoverageReport(string coverageReport)
         {
             // Save coverage report to file
@@ -60,6 +67,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.SendAttachment(coverageReportPath);
         }
 
+        /// <summary>
+        /// Disposes attachment manager
+        /// </summary>
         public void Dispose()
         {
             // Unregister events
@@ -72,6 +82,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.CleanupReportDirectory();
         }
 
+        /// <summary>
+        /// Saves coverage report to file system
+        /// </summary>
+        /// <param name="report">Coverage report</param>
+        /// <returns>Coverage report file path</returns>
         private string SaveCoverageReport(string report)
         {
             try
@@ -90,6 +105,11 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// SendFileCompleted event handler
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event args</param>
         public void OnSendFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             try
@@ -104,6 +124,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// Sends attachment file to test platform
+        /// </summary>
+        /// <param name="attachmentPath">Attachment file path</param>
         private void SendAttachment(string attachmentPath)
         {
             if (this.fileHelper.Exists(attachmentPath))
@@ -114,6 +138,9 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             }
         }
 
+        /// <summary>
+        /// Cleans up coverage report directory
+        /// </summary>
         private void CleanupReportDirectory()
         {
             try
