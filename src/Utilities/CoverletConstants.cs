@@ -17,5 +17,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
         public const string ExcludeAttributesElementName = "ExcludeByAttribute";
         public const string MergeWithElementName = "MergeWith";
         public const string UseSourceLinkElementName = "UseSourceLink";
+        public const string SingleHitElementName = "SingleHit";
+        public const string TestSourcesPropertyName = "TestSources";
     }
 }

@@ -3,33 +3,48 @@
 
 namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCollector
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Xml;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Interfaces;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
+    /// <summary>
+    /// Coverlet coverage out-proc data collector.
+    /// </summary>
     [DataCollectorTypeUri(CoverletConstants.DefaultUri)]
     [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
-    public class CoverletCoverageDataCollector : DataCollector
+    public class CoverletCoverageCollector : DataCollector
     {
-        private readonly CoverletEqtTrace eqtTrace;
+        private readonly TestPlatformEqtTrace eqtTrace;
         private DataCollectionEvents events;
-        private CoverletLogger logger;
+        private TestPlatformLogger logger;
         private XmlElement configurationElement;
         private DataCollectionSink dataSink;
         private DataCollectionContext dataCollectionContext;
         private CoverageManager coverageManager;
-        private AttachmentManager attachmentManager;
+        private ICoverageWrapper coverageWrapper;
 
-        public CoverletCoverageDataCollector() : this(new CoverletEqtTrace())
+        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper())
         {
         }
 
-        private CoverletCoverageDataCollector(CoverletEqtTrace eqtTrace) : base()
+        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper) : base()
         {
             this.eqtTrace = eqtTrace;
+            this.coverageWrapper = coverageWrapper;
         }
 
+        /// <summary>
+        /// Initializes data collector
+        /// </summary>
+        /// <param name="configurationElement">Configuration element</param>
+        /// <param name="events">Events to register on</param>
+        /// <param name="dataSink">Data sink to send attachments to test platform</param>
+        /// <param name="logger">Test platform logger</param>
+        /// <param name="environmentContext">Environment context</param>
         public override void Initialize(
             XmlElement configurationElement,
             DataCollectionEvents events,
@@ -39,7 +54,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             if (this.eqtTrace.IsInfoEnabled)
             {
-                this.eqtTrace.Info("Initializing {0} with configuration: {1}", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);
+                this.eqtTrace.Info("Initializing {0} with configuration: '{1}'", CoverletConstants.DataCollectorName, configurationElement?.OuterXml);
             }
 
             // Store input variables
@@ -47,13 +62,17 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.configurationElement = configurationElement;
             this.dataSink = dataSink;
             this.dataCollectionContext = environmentContext.SessionDataCollectionContext;
-            this.logger = new CoverletLogger(logger, this.dataCollectionContext);
+            this.logger = new TestPlatformLogger(logger, this.dataCollectionContext);
 
             // Register events
             this.events.SessionStart += this.OnSessionStart;
             this.events.SessionEnd += this.OnSessionEnd;
         }
 
+        /// <summary>
+        /// Disposes the data collector
+        /// </summary>
+        /// <param name="disposing">Disposing flag</param>
         protected override void Dispose(bool disposing)
         {
             this.eqtTrace.Verbose("{0}: Disposing", CoverletConstants.DataCollectorName);
@@ -65,28 +84,74 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 this.events.SessionEnd -= this.OnSessionEnd;
             }
 
-            // Dispose
-            this.attachmentManager?.Dispose();
+            // Remove vars
+            this.events = null;
+            this.dataSink = null;
+            this.coverageManager = null;
+
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// SessionStart event handler
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="sessionStartEventArgs">Event args</param>
         private void OnSessionStart(object sender, SessionStartEventArgs sessionStartEventArgs)
         {
             this.eqtTrace.Verbose("{0}: SessionStart received", CoverletConstants.DataCollectorName);
 
-            // Get coverlet settings
-            IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
-            var coverletSettingsParser = new CoverletSettingsParser(this.logger, this.eqtTrace);
-            var coverletSettings = coverletSettingsParser.Parse(this.configurationElement, testModules);
+            try
+            {
+                // Get coverlet settings
+                IEnumerable<string> testModules = this.GetTestModules(sessionStartEventArgs);
+                var coverletSettingsParser = new CoverletSettingsParser(this.eqtTrace);
+                var coverletSettings = coverletSettingsParser.Parse(this.configurationElement, testModules);
 
-            // Get coverage and attachment managers
-            this.coverageManager = new CoverageManager(coverletSettings, this.logger, this.eqtTrace);
-            this.attachmentManager = new AttachmentManager(dataSink, this.dataCollectionContext, this.logger, this.eqtTrace, this.GetReportFileName());
-            
-            // Start instrumentation
-            this.coverageManager.StartInstrumentation();
+                // Get coverage and attachment managers
+                this.coverageManager = new CoverageManager(coverletSettings, this.eqtTrace, this.logger, this.coverageWrapper);
+
+                // Instrument modules
+                this.coverageManager.InstrumentModules();
+            }
+            catch(Exception ex)
+            {
+                this.logger.LogWarning(ex.ToString());
+                this.Dispose(true);
+            }
         }
 
+        /// <summary>
+        /// SessionEnd event handler
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event args</param>
+        private void OnSessionEnd(object sender, SessionEndEventArgs e)
+        {
+            try
+            {
+                this.eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
+
+                // Get coverage reports
+                var coverageReport = this.coverageManager?.GetCoverageReport();
+
+                // Send result attachments to test platform.
+                using(var attachmentManager = new AttachmentManager(dataSink, this.dataCollectionContext, this.logger, this.eqtTrace, this.GetReportFileName()))
+                {
+                    attachmentManager?.SendCoverageReport(coverageReport);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogWarning(ex.ToString());
+                this.Dispose(true);
+            }
+        }
+
+        /// <summary>
+        /// Gets coverage report file name
+        /// </summary>
+        /// <returns>Coverage report file name</returns>
         private string GetReportFileName()
         {
             var fileName = CoverletConstants.DefaultFileName;
@@ -95,24 +160,19 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             return extension == null ? fileName : $"{fileName}.{extension}";
         }
 
-        private void OnSessionEnd(object sender, SessionEndEventArgs e)
-        {
-            this.eqtTrace.Verbose("{0}: SessionEnd received", CoverletConstants.DataCollectorName);
-
-            // Get coverage reports
-            var coverageReport = this.coverageManager?.GetCoverageReport();
-            if (coverageReport == null) return;
-
-            // Send result attachments to test platform.
-            this.attachmentManager?.SendCoverageReport(coverageReport);
-        }
-
+        /// <summary>
+        /// Gets test modules
+        /// </summary>
+        /// <param name="sessionStartEventArgs">Event args</param>
+        /// <returns>Test modules list</returns>
         private IEnumerable<string> GetTestModules(SessionStartEventArgs sessionStartEventArgs)
         {
-            var testModules = sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>("TestSources");
+            var testModules = sessionStartEventArgs.GetPropertyValue<IEnumerable<string>>(CoverletConstants.TestSourcesPropertyName);
             if (this.eqtTrace.IsInfoEnabled)
             {
-                this.eqtTrace.Info("{0}: TestModules: {1}", CoverletConstants.DataCollectorName, string.Join(",", testModules));
+                this.eqtTrace.Info("{0}: TestModules: '{1}'",
+                    CoverletConstants.DataCollectorName,
+                    string.Join(",", testModules ?? Enumerable.Empty<string>()));
             }
 
             return testModules;

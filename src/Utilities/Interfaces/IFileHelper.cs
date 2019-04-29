@@ -22,39 +22,5 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
         /// <param name="path">The file to write to.</param>
         /// <param name="contents">The string to write to the file.</param>
         void WriteAllText(string path, string contents);
-
-        /// <summary>
-        /// Returns the path of the current user's temporary folder.
-        /// </summary>
-        /// <returns>The path to the temporary folder, ending with a backslash.</returns>
-        string GetTempPath();
-
-        /// <summary>
-        /// Combines two strings into a path.
-        /// </summary>
-        /// <param name="path1">The first path to combine.</param>
-        /// <param name="path2">The second path to combine.</param>
-        /// <returns>The combined paths. If one of the specified paths is a zero-length string, this method returns the other path. If path2 contains an absolute path, this method returns path2.</returns>
-        string Combine(string path1, string path2);
-
-        /// <summary>
-        /// Creates all directories and subdirectories in the specified path unless they already exist.
-        /// </summary>
-        /// <param name="directory">The directory to create.</param>
-        void CreateDirectory(string directory);
-
-        /// <summary>
-        /// Deletes the specified directory and, if indicated, any subdirectories and files in the directory.
-        /// </summary>
-        /// <param name="path">The name of the directory to remove.</param>
-        /// <param name="recursive">true to remove directories, subdirectories, and files in path; otherwise, false.</param>
-        void Delete(string path, bool recursive);
-
-        /// <summary>
-        /// Returns the directory information for the specified path string.
-        /// </summary>
-        /// <param name="path">The path of a file or directory.</param>
-        /// <returns>Directory information for path, or null if path denotes a root directory or is null. Returns Empty if path does not contain directory information.</returns>
-        string GetDirectoryName(string path);
     }
 }

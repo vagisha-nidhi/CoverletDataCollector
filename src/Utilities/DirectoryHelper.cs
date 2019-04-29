@@ -7,18 +7,24 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilit
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities.Interfaces;
 
     /// <inheritdoc />
-    internal class FileHelper : IFileHelper
+    internal class DirectoryHelper : IDirectoryHelper
     {
         /// <inheritdoc />
         public bool Exists(string path)
         {
-            return File.Exists(path);
+            return Directory.Exists(path);
         }
 
         /// <inheritdoc />
-        public void WriteAllText(string path, string contents)
+        public void CreateDirectory(string path)
         {
-            File.WriteAllText(path, contents);
+            Directory.CreateDirectory(path);
+        }
+
+        /// <inheritdoc />
+        public void Delete(string path, bool recursive)
+        {
+            Directory.Delete(path, recursive);
         }
     }
 }

@@ -5,85 +5,94 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
 {
     using System;
     using Coverlet.Core;
+    using Coverlet.Core.Logging;
     using Coverlet.Core.Reporters;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Interfaces;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
 
+    /// <summary>
+    /// Manages coverlet coverage
+    /// </summary>
     internal class CoverageManager
     {
         private readonly Coverage coverage;
-        private readonly CoverletLogger logger;
-        private readonly CoverletEqtTrace eqtTrace;
+
+        private ICoverageWrapper coverageWrapper;
 
         public IReporter Reporter { get; }
 
-        public CoverageManager(CoverletSettings settings, CoverletLogger logger, CoverletEqtTrace eqtTrace)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this (settings,
-                  logger,
-                  eqtTrace,
-                  new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter())
+                  new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter(), 
+                  new CoverletLogger(eqtTrace, logger), 
+                  coverageWrapper)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, CoverletLogger logger, CoverletEqtTrace eqtTrace, IReporter reporter)
+        public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
-            this.logger = logger;
-            this.eqtTrace = eqtTrace;
             this.Reporter = reporter;
+            this.coverageWrapper = coverageWrapper;
 
             // Coverage object
-            this.coverage = new Coverage(
-                settings.TestModule,
-                settings.IncludeFilters,
-                settings.IncludeDirectories,
-                settings.ExcludeFilters,
-                settings.ExcludeSourceFiles,
-                settings.ExcludeAttributes,
-                settings.MergeWith,
-                settings.UseSourceLink);
+            this.coverage = this.coverageWrapper.CreateCoverage(settings, logger);
         }
 
-        public void StartInstrumentation()
+        /// <summary>
+        /// Instrument modules
+        /// </summary>
+        public void InstrumentModules()
         {
             try
             {
                 // Instrument modules
-                this.coverage.PrepareModules();
+                this.coverageWrapper.PrepareModules(this.coverage);
             }
             catch (Exception ex)
             {
-                this.eqtTrace.Error("{0}: Failed to instrument modules with exception {1}", CoverletConstants.DataCollectorName, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.InstrumentationException, ex));
+                var errorMessage = string.Format(Resources.InstrumentationException, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
         }
 
+        /// <summary>
+        /// Gets coverlet coverage report
+        /// </summary>
+        /// <returns>Coverage report</returns>
         public string GetCoverageReport()
         {
             // Get coverage result
             var coverageResult = this.GetCoverageResult();
-            if (coverageResult == null) return null;
 
             // Get coverage report in default format
             var coverageReport = this.GetCoverageReport(coverageResult);
             return coverageReport;
         }
 
+        /// <summary>
+        /// Gets coverlet coverage result
+        /// </summary>
+        /// <returns>Coverage result</returns>
         private CoverageResult GetCoverageResult()
         {
             try
             {
-                return this.coverage.GetCoverageResult();
+                return this.coverageWrapper.GetCoverageResult(this.coverage);
             }
             catch (Exception ex)
             {
-                this.eqtTrace.Error("{0}: Failed to get coverage result with exception {1}", CoverletConstants.DataCollectorName, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.CoverageResultException, ex));
+                var errorMessage = string.Format(Resources.CoverageResultException, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
-
-            return default(CoverageResult);
         }
 
+        /// <summary>
+        /// Gets coverage report from coverage result
+        /// </summary>
+        /// <param name="coverageResult">Coverage result</param>
+        /// <returns>Coverage report</returns>
         private string GetCoverageReport(CoverageResult coverageResult)
         {
             try
@@ -91,13 +100,10 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 return this.Reporter.Report(coverageResult);
             }
             catch (Exception ex)
-
             {
-                this.eqtTrace.Error("{0}: Failed to get {1} report with exception {2}", CoverletConstants.DataCollectorName, this.Reporter.Format, ex);
-                this.logger.LogError(new CoverletDataCollectorException(Resources.CoverageResultException, ex));
+                var errorMessage = string.Format(Resources.CoverageReportException, CoverletConstants.DataCollectorName);
+                throw new CoverletDataCollectorException(errorMessage, ex);
             }
-
-            return default(string);
         }
     }
 }

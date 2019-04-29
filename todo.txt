@@ -1,20 +1,28 @@
 TODOs of coverlet data collector:
-1. create different folders in sln if necessary. Example: moving fileHelper class in Utilities folder.
-2. check if logs, eqttrace are actually appearing in actual (they might come in unit testing but not in actual)
 3. Resource localization??
 4. add comments
-5. what happens if in actual Configuration element is not passed in runsettings?
-6. Run all and run selected scenarios
-7. Test VS, pipeline and command line
-8. Check if we can change the attachment name in existing data collectors, If yes, do here as well.
-9. we are logging errors and warnings everywhere. Think about info logs as well for both logging and for tracing.
-10. Check where to use IsErrorEnabled. Example: in case of some calculations
-11. What happens if an event is done "-=" more than once? Do we throw error? If yes, we can encounter that case. Example in case of Dispose of attachmentManager.
-12. CoverageManager.GetCoverageResult:
-	i. CoverageResult value can be null in case of exception (only if test platform doesn't exit in case of logging error. Verify this.)
-  ii. Also checks what happens of GetCoverageResult is called before calling PrepareModules OR called even if PrepareModules fails.
-13. Test for linux and mac
-14. Remove IsWarningEnabled from code which are not used anywhere in the code.
-15. What happens in case coverlet throws error while instrumentation or while coverage collection. Are we able to forward it properly?
 16. we are doing configurationElement[CoverletConstants.IncludeFiltersElementName], check if casing matters here. In runsettings change the casing.
 14. Check if all the traces and logs are printed properly. Specially CoverletSettings.ToString() override.
+15. If any error like, missingmethodexception, then OnSessionStart doesn't log it anywhere. we should trace it.
+19. Acceptance tests to write:
+		a. vstest.console with dll: without runsettings
+		b. dotnet test or dotnet vstest: without runsettings
+		c. dotnet test or dotnet vstest: with runsettings
+20. Correctness UTs or functional tests: Copy from coverlet
+21. Try with multiple test sources in both vstest.console.exe and dotnet test that only one test source is coming to collector. Do the same for multiple test cases with different test sources as well.
+22. We are getting exception like: "Data collector 'XPlat code coverage' message: Data collector caught an exception of type 'Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities.CoverletDataCollectorException': 'Failed to instrument modules'. More details: ..""
+We should print inner exception to prevent such cases.
+23. Inproc flow should go as out of proc.
+24. coverlet new logger implementation
+
+Scenarios:
+validations - tested for windows and linux
+1. --collect:"XPlat code coverage" works properly
+2. dotnet test with different casing --collect:"xpLAt coDe coveraGE"
+3. dotnet test with runsettings with correct inputs (without configuration, with empty configuration, without uri, with wrong uri, with correct configuration, empty inlcude filter)
+4. dotnet test with runsettings with incorrect input keys and incorrect key's values
+5. dotnet test with both runsettings and --collect:"XPlat code coverage"
+6. Postive eqttrace logs
+7. Negative eqttrace and logger logs
+
+Current: testing casing with attributes in runsettings
