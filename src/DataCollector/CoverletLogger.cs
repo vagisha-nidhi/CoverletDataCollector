@@ -20,7 +20,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             this.eqtTrace = eqtTrace;
             this.logger = logger;
         }
-        
+
         /// <summary>
         /// Logs error
         /// </summary>

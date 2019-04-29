@@ -7,6 +7,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     using Coverlet.Core;
     using Coverlet.Core.Logging;
     using Coverlet.Core.Reporters;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Interfaces;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
 
@@ -17,32 +18,26 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     {
         private readonly Coverage coverage;
 
+        private ICoverageWrapper coverageWrapper;
+
         public IReporter Reporter { get; }
 
-        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger)
+        public CoverageManager(CoverletSettings settings, TestPlatformEqtTrace eqtTrace, TestPlatformLogger logger, ICoverageWrapper coverageWrapper)
             : this (settings,
-                  new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter(),
-                  new CoverletLogger(eqtTrace, logger))
+                  new ReporterFactory(CoverletConstants.DefaultReportFormat).CreateReporter(), 
+                  new CoverletLogger(eqtTrace, logger), 
+                  coverageWrapper)
         {
         }
 
-        public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger coverletLogger)
+        public CoverageManager(CoverletSettings settings, IReporter reporter, ILogger logger, ICoverageWrapper coverageWrapper)
         {
             // Store input vars
             this.Reporter = reporter;
+            this.coverageWrapper = coverageWrapper;
 
             // Coverage object
-            this.coverage = new Coverage(
-                settings.TestModule,
-                settings.IncludeFilters,
-                settings.IncludeDirectories,
-                settings.ExcludeFilters,
-                settings.ExcludeSourceFiles,
-                settings.ExcludeAttributes,
-                settings.SingleHit,
-                settings.MergeWith,
-                settings.UseSourceLink,
-                coverletLogger);
+            this.coverage = this.coverageWrapper.CreateCoverage(settings, logger);
         }
 
         /// <summary>
@@ -53,7 +48,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             try
             {
                 // Instrument modules
-                this.coverage.PrepareModules();
+                this.coverageWrapper.PrepareModules(this.coverage);
             }
             catch (Exception ex)
             {
@@ -84,7 +79,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
             try
             {
-                return this.coverage.GetCoverageResult();
+                return this.coverageWrapper.GetCoverageResult(this.coverage);
             }
             catch (Exception ex)
             {

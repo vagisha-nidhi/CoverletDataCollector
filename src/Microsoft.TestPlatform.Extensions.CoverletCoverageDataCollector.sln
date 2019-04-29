@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28809.33
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector", "Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.csproj", "{A8068392-154C-4182-A94C-0A21C19D2C95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverletCoverageDataCollector.UnitTests", "..\test\CoverletDataCollector.UnitTests\CoverletCoverageDataCollector.UnitTests.csproj", "{4F4D0247-D38A-4721-96D8-C2F9889022CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A8068392-154C-4182-A94C-0A21C19D2C95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8068392-154C-4182-A94C-0A21C19D2C95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8068392-154C-4182-A94C-0A21C19D2C95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F4D0247-D38A-4721-96D8-C2F9889022CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F4D0247-D38A-4721-96D8-C2F9889022CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F4D0247-D38A-4721-96D8-C2F9889022CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F4D0247-D38A-4721-96D8-C2F9889022CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

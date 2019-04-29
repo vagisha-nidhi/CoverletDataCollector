@@ -8,6 +8,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     using System.IO;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Resources;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities.Interfaces;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
     /// <summary>
@@ -19,8 +20,8 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         private readonly TestPlatformEqtTrace eqtTrace;
         private readonly TestPlatformLogger logger;
         private readonly DataCollectionContext dataCollectionContext;
-        private readonly FileHelper fileHelper;
-        private readonly DirectoryHelper directoryHelper;
+        private readonly IFileHelper fileHelper;
+        private readonly IDirectoryHelper directoryHelper;
         private readonly string reportFileName;
         private readonly string reportDirectory;
 
@@ -36,7 +37,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         {
         }
 
-        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, FileHelper fileHelper, DirectoryHelper directoryHelper)
+        public AttachmentManager(DataCollectionSink dataSink, DataCollectionContext dataCollectionContext, TestPlatformLogger logger, TestPlatformEqtTrace eqtTrace, string reportFileName, string reportDirectoryName, IFileHelper fileHelper, IDirectoryHelper directoryHelper)
         {
             // Store input vars
             this.dataSink = dataSink;
@@ -77,9 +78,6 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
             {
                 this.dataSink.SendFileCompleted -= this.OnSendFileCompleted;
             }
-
-            // Cleanup report directory
-            this.CleanupReportDirectory();
         }
 
         /// <summary>

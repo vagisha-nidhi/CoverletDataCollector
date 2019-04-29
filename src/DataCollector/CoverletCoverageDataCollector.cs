@@ -7,6 +7,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     using System.Collections.Generic;
     using System.Linq;
     using System.Xml;
+    using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Interfaces;
     using Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.Utilities;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 
@@ -15,7 +16,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
     /// </summary>
     [DataCollectorTypeUri(CoverletConstants.DefaultUri)]
     [DataCollectorFriendlyName(CoverletConstants.FriendlyName)]
-    public class CoverletCoverageDataCollector : DataCollector
+    public class CoverletCoverageCollector : DataCollector
     {
         private readonly TestPlatformEqtTrace eqtTrace;
         private DataCollectionEvents events;
@@ -24,14 +25,16 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
         private DataCollectionSink dataSink;
         private DataCollectionContext dataCollectionContext;
         private CoverageManager coverageManager;
+        private ICoverageWrapper coverageWrapper;
 
-        public CoverletCoverageDataCollector() : this(new TestPlatformEqtTrace())
+        public CoverletCoverageCollector() : this(new TestPlatformEqtTrace(), new CoverageWrapper())
         {
         }
 
-        private CoverletCoverageDataCollector(TestPlatformEqtTrace eqtTrace) : base()
+        internal CoverletCoverageCollector(TestPlatformEqtTrace eqtTrace, ICoverageWrapper coverageWrapper) : base()
         {
             this.eqtTrace = eqtTrace;
+            this.coverageWrapper = coverageWrapper;
         }
 
         /// <summary>
@@ -106,7 +109,7 @@ namespace Microsoft.TestPlatform.Extensions.CoverletCoverageDataCollector.DataCo
                 var coverletSettings = coverletSettingsParser.Parse(this.configurationElement, testModules);
 
                 // Get coverage and attachment managers
-                this.coverageManager = new CoverageManager(coverletSettings, this.eqtTrace, this.logger);
+                this.coverageManager = new CoverageManager(coverletSettings, this.eqtTrace, this.logger, this.coverageWrapper);
 
                 // Instrument modules
                 this.coverageManager.InstrumentModules();
