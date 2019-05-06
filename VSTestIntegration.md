@@ -66,7 +66,7 @@ How to specify these options via runsettings?
   </DataCollectionRunSettings>
 </RunSettings>
 ```
-This runsettings file acan easily be provided using commnd line as given :
+This runsettings file can easily be provided using command line option as given :
 
 1. `dotnet test --settings coverletArgs.runsettings`
 
