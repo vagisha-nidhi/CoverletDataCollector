@@ -1,7 +1,7 @@
 # Coverlet Integration with VSTest
 
 ## Motivation
-Code coverage generation for .NET Core for both Linux and Windows platform (in consistent manner).
+Code coverage generation for .NET Core for both Linux and Windows platform (in a consistent manner).
 The asks for Code Coverage support for .NET Core on Linux is the most commented issue on vstest repo:
 https://github.com/Microsoft/vstest/issues/981#issuecomment-320311552
 
@@ -74,14 +74,14 @@ This runsettings file can easily be provided using command line option as given 
 
 
 #### Scope of Enhancement 
-The advanced options are today supported only via runsettings. This can be addressed such that the extra arguments can be passed via command line as well. 
+The advanced options are today supported only via runsettings. This can be taken up as an enhancement such that the these options can be supported with command line collect argument in vstest.
 
 ## Implementation Details
 The proposed solution is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md). 
-1. Outproc Datacollector : The outproc collector would always run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector would be respomsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
+1. Outproc Datacollector : The outproc collector would always run in a separate process(datacollector.exe/datacollector.dll) than the process in which tests are being executed(testhost*.exe/testhost.dll). This datacollector would be responsible for calling into coverlet APIs for instrumenting dlls, collecting coverage results and sending the coverage output file back to test platform.
 2. Inproc Datacollector : The inproc collector in the testhost process executing the tests. This collector will be needed to remove the dependency on the exit handler to flush the hit files.
 
-The outproc datacollector will be bundled as a separate NuGet package, the reference to which will be added by default in the .NET Core test templates, thus making it the default solution for collecting code coverage for .NET core projects.
+The datacollectors will be bundled as a separate NuGet package, the reference to which will be added by default in the .NET Core test templates, thus making it the default solution for collecting code coverage for .NET core projects.
 ```
 <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
