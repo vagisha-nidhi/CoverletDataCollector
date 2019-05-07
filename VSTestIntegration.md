@@ -1,7 +1,7 @@
 # Coverlet Integration with VSTest
 
 ## Motivation
-Code coverage generation for .NET Core for both Linux and Windows platform (in a consistent manner).
+The cross platform solution for code coverage generation for .NET Core projects(in a consistent manner).
 The asks for Code Coverage support for .NET Core on Linux is the most commented issue on vstest repo:
 https://github.com/Microsoft/vstest/issues/981#issuecomment-320311552
 
@@ -10,7 +10,7 @@ What would integrating Coverlet with Microsoft Test Platform mean:
 
 1. Coverlet based coverage solution is available as a data collector that does the instrumentation of the necessary modules before test execution and appropriate restore after.
 2. Authoring - When new test projects are created (dotnet mstest), references to the data collector package are added by default. This reduces adoption friction for customers.
-3. Test execution - Today Coverlet is invoked as a msbuild target and as such only works with dotnet test (and requires a csproj). With the data collector in #1 becoming available, coverage can also be collected when tests are run on built binaries (dotnet vstest)
+3. Test execution - Today Coverlet is invoked as a msbuild target and as such only works with dotnet test (and requires a csproj). With the data collector becoming available, coverage can also be collected when tests are run on built binaries (dotnet vstest)
 
 ## Proposed Solution
 
@@ -19,8 +19,8 @@ The following table summarizes the support that needs to be added for a seamless
 
 | Entry point | How will code coverage be enabled? | Syntax                                                               |
 |-------------|------------------------------------|----------------------------------------------------------------------|
-|dotnet test CLI              | Through a switch to condition data collection | `dotnet test --collect:"XPlat code Coverage"`   |
-|dotnet vstest CLI            | Through a switch to condition data collection | `dotnet vstest --collect:"XPlat code Coverage"` |
+|dotnet test CLI              | Through a switch to condition data collection | `dotnet test --collect:"XPlat Code Coverage"`   |
+|dotnet vstest CLI            | Through a switch to condition data collection | `dotnet vstest --collect:"XPlat Code Coverage"` |
 
 ### Coverlet Options Supported with VSTest
 
@@ -74,7 +74,7 @@ This runsettings file can easily be provided using command line option as given 
 
 
 #### Scope of Enhancement 
-The advanced options are today supported only via runsettings. This can be taken up as an enhancement such that the these options can be supported with command line collect argument in vstest.
+Currently, advanced options are supported via runsettings. Providing support through additional command line arguments in vstest can be taken up separately.
 
 ## Implementation Details
 The proposed solution is implemented with the help of [datacollectors](https://github.com/Microsoft/vstest-docs/blob/master/docs/extensions/datacollector.md). 
