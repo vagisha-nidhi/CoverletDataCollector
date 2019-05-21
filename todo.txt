@@ -25,4 +25,4 @@ validations - tested for windows and linux
 6. Postive eqttrace logs
 7. Negative eqttrace and logger logs
 
-Current: testing casing with attributes in runsettings
+Current: testing casing with attributes in runsettings - it is case sensitive. Do we fix it to case insensitive?
